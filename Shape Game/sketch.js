@@ -10,15 +10,18 @@ function setup() {
   rectMode(CENTER);
   x = width/2;
   y = height/2;
-
+  stroke(0);
+  strokeWeight(1);
   let newShape = createButton("New Shape");
   newShape.position(20,20);
   newShape.mousePressed(generateNewShape);
+  newShape.style('background-color','#e6f4e1');
   generateNewShape();
 }
 
 function generateNewShape(){
   background(220);
+  fill('#cee4e9');
   size = random(125,250);
   number = random(100,200);
   x = random(300,350);
@@ -34,11 +37,13 @@ function generateNewShape(){
     rect(x,y,size,size+50);
   }
   if(choice === 3){
-    beginShape();
-    vertex(x,y-size/2);
-    vertex(x+random(size/4,size/2),y+size/2);
-    vertex(x-random(size/4,size/2),y+size/2);
-    endShape();
+    let x1 = x;
+    let y1 = y - size / 2;
+    let x2 = x + random(size / 4, size / 2);
+    let y2 = y + size / 2;
+    let x3 = x - random(size / 4, size / 2);
+    let y3 = y + size / 2;
+    triangle(x1, y1, x2, y2, x3, y3);
   }
   if(choice === 4){
     let startAngle = random(0,360);
