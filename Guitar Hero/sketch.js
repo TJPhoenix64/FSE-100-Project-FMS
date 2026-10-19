@@ -15,6 +15,9 @@ function draw() {
   currentTime = millis();
   background(220);
   makeLane(50, 100);
+  makeLane(100, 150);
+  makeLane(150, 200);
+  makeLane(200, 250);
 
   //print("time:" + delta);
   for (let i = circleList.length - 1; i >= 0; i--) {
@@ -26,7 +29,7 @@ function draw() {
     }
   }
   print(circleList.length);
-  makeTarget();
+  makeTarget(50, 250);
 }
 
 function keyPressed() {
@@ -38,19 +41,24 @@ function keyPressed() {
 
 function createNote() {
   let myColor = color(50, 255, 50);
-  let xVal = random(50, 450);
-  circleList.push(new Note(xVal, 50, myColor, 50));
+  let xVal = random(0, 1);
+  xVal *= 4;
+  xVal = Math.floor(xVal);
+  circleList.push(new Note(xVal * 50 + 75, 50, myColor, 50));
 }
 
 function makeLane(startX, endX) {
+  stroke(0);
+  strokeWeight(3);
   line(startX, 0, startX, height);
   line(endX, 0, endX, height);
   fill(255, 0, 0);
-  circle(startX + (startX - endX) / 2.0, 500, startX - endX);
+  circle(startX + 25, 500, startX - endX);
 }
 
-function makeTarget() {
+function makeTarget(startX, endX) {
+  stroke(0);
   strokeWeight(10);
-  line(0, 500, 500, 500);
+  line(startX, 500, endX, 500);
   strokeWeight(1);
 }

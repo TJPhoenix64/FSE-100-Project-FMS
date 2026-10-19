@@ -15,6 +15,7 @@ class Note {
     fill(this.noteColor);
     noStroke();
     circle(this.x, this.y, this.size);
+    stroke(0);
     strokeWeight(1);
   }
 
