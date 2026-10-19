@@ -41,10 +41,18 @@ function keyPressed() {
 
 function createNote() {
   let myColor = color(50, 255, 50);
+  let val = randInt(10, 11);
+  console.log(val);
+  circleList.push(new Note(val * 50 + 25, 50, myColor, 50));
+}
+
+//generates an integer inclusive between low and high
+function randInt(low, high) {
   let xVal = random(0, 1);
-  xVal *= 4;
+  xVal *= high - low + 1;
+  xVal += low;
   xVal = Math.floor(xVal);
-  circleList.push(new Note(xVal * 50 + 75, 50, myColor, 50));
+  return xVal;
 }
 
 function makeLane(startX, endX) {
