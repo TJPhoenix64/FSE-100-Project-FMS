@@ -22,4 +22,8 @@ class Note {
   getY() {
     return this.y;
   }
+
+  getX() {
+    return this.x;
+  }
 }
