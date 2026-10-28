@@ -6,8 +6,8 @@ var baseStopAngle;
 var size;
 var number;
 
-var x;
-var y;
+let optionShapes = [];
+let selectedShape = null;
 
 function setup() {
   createCanvas(800, 500);
@@ -16,12 +16,13 @@ function setup() {
   rectMode(CENTER);
   stroke(0);
   strokeWeight(1);
+  
   let newShape = createButton("New Shape");
   newShape.position(20,20);
   newShape.mousePressed(newRound);
   newShape.style('background-color','#e6f4e1');
-  generateBaseShape();
-  generateShape();
+  
+  newRound();
 }
 
 function newRound(){
@@ -31,74 +32,92 @@ function newRound(){
 }
 
 function generateBaseShape(){
-  background(220);
-  fill('#cee4e9');
   size = random(125,250);
   number = random(100,200);
   
   baseChoice = floor(random(5));
   baseStartAngle = random(0, 360);
   baseStopAngle = baseStartAngle + random(90, 180);
-  
-  if(baseChoice === 0){
-    square(baseX, baseY, size);
-  }
-  else if(baseChoice === 1){
-    circle(baseX, baseY, size);
-  }
-  else if(baseChoice === 2){
-    rect(baseX, baseY, size, size + 50);
-  }
-  else if(baseChoice === 3){
-    let x1 = baseX;
-    let y1 = baseY - size / 2;
-    let x2 = baseX + random(size / 4, size / 2);
-    let y2 = baseY + size / 2;
-    let x3 = baseX - random(size / 4, size / 2);
-    let y3 = baseY + size / 2;
-    triangle(x1, y1, x2, y2, x3, y3);
-  }
-  else if(baseChoice === 4){
-    arc(baseX, baseY, size, size + 50, baseStartAngle, baseStopAngle, PIE);
-  }
 }
 
 function generateShape(){
-  fill('#f0dbdb');
-  //square
-  x = 300 + random(200,400);
-  y = 250 + random(-100,100);
-  square(x, y, size);
-  //circle
-  x = 300 + random(200,400);
-  y = 250 + random(-100,100);
-  circle(x, y, size);
-  //rect
-  x = 300 + random(200,400);
-  y = 250 + random(-100,100);
-  rect(x, y, size, size + 50);
-  //triangle
-  x = 300 + random(200,400);
-  y = 250 + random(-100,100);
-  let x1 = x;
-  let y1 = y - size / 2;
-  let x2 = x + random(size / 4, size / 2);
-  let y2 = y + size / 2;
-  let x3 = x - random(size / 4, size / 2);
-  let y3 = y + size / 2;
-  triangle(x1, y1, x2, y2, x3, y3);
-  //arc
-  x = 300 + random(200,400);
-  y = 250 + random(-100,100);
-  arc(x, y, size, size + 50, baseStartAngle, baseStopAngle, PIE);
+  optionShapes = [];
+  for(let i = 0; i < 5; i++){
+    let sAngle = random(0,360);
+    let eAngle = sAngle + random(90,180);
+    
+    if(i === 4 && baseChoice === 4){
+      sAngle = baseStartAngle;
+      eAngle = baseStopAngle;
+    }
+    
+    optionShapes.push({
+      x: random(500, 700),
+      y: random(100, 400),
+      choice: i,
+      startAngle: sAngle,
+      stopAngle: eAngle
+    });
+  }
+}
+
+function drawSpecificShape(x, y, choice, size, startAngle, stopAngle){
+  if(choice === 0){
+    square(x, y, size);
+  }
+  else if(choice === 1){
+    circle(x, y, size);
+  }
+  else if(choice === 2){
+    rect(x, y, size, size + 50);
+  }
+  else if(choice === 3){
+    let x1 = x;
+    let y1 = y - size / 2;
+    let x2 = x + size / 3;
+    let y2 = y + size / 2;
+    let x3 = x - size / 3;
+    let y3 = y + size / 2;
+    triangle(x1, y1, x2, y2, x3, y3);
+  }
+  else if(choice === 4){
+    arc(x, y, size, size + 50, startAngle, stopAngle, PIE);
+  }
 }
 
 function mousePressed(){
+  for (let i = optionShapes.length - 1; i >= 0; i--) {
+    let shape = optionShapes[i];
+    let d = dist(mouseX, mouseY, shape.x, shape.y);
+    if (d < size / 2) {
+      selectedShape = shape; 
+      optionShapes.splice(i, 1);
+      optionShapes.push(selectedShape);
+      break;
+    }
+  }
 }
+
 function mouseDragged(){
+  if(selectedShape != null){
+    selectedShape.x = mouseX;
+    selectedShape.y = mouseY;
+    redraw();
+  }
 }
+
 function mouseReleased(){
+  selectedShape = null;
 }
 
 function draw() {
+  background(220);
+  fill('#cee4e9');
+  drawSpecificShape(baseX, baseY, baseChoice, size, baseStartAngle, baseStopAngle);
+  
+  fill('#f0dbdb');
+  for(let i = 0; i < 5; i++){
+    let shape = optionShapes[i];
+    drawSpecificShape(shape.x, shape.y, shape.choice, size, shape.startAngle, shape.stopAngle);
+  }
 }
