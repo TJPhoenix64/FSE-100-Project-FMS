@@ -23,7 +23,7 @@ function setup() {
   newShape.style('background-color','#e6f4e1');
 
   let home = createButton("Homescreen");
-  home.position(600, 20);
+  home.position(680, 20);
   home.style('background-color', '#e6f4e1');
   home.mousePressed(function () {
     window.location.href = "../index.html";
