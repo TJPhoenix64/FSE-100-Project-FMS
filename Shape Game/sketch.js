@@ -5,12 +5,15 @@ var baseStartAngle;
 var baseStopAngle;
 var size;
 var number;
+var difficulty = 30;
 
 let optionShapes = [];
 let selectedShape = null;
 
+let success = false;
+
 function setup() {
-  createCanvas(800, 500);
+  createCanvas(windowWidth, windowHeight);
   background(220);
   noLoop();
   rectMode(CENTER);
@@ -23,7 +26,7 @@ function setup() {
   newShape.style('background-color','#e6f4e1');
 
   let home = createButton("Homescreen");
-  home.position(680, 20);
+  home.position(windowWidth - 120, 20);
   home.style('background-color', '#e6f4e1');
   home.mousePressed(function () {
     window.location.href = "../index.html";
@@ -114,7 +117,11 @@ function mouseDragged(){
 }
 
 function mouseReleased(){
-  selectedShape = null;
+  if(selectedShape !== null){
+    successCheck();
+    selectedShape = null;
+    redraw();
+  }
 }
 
 function draw() {
@@ -126,5 +133,18 @@ function draw() {
   for(let i = 0; i < 5; i++){
     let shape = optionShapes[i];
     drawSpecificShape(shape.x, shape.y, shape.choice, size, shape.startAngle, shape.stopAngle);
+  }
+}
+
+function successCheck(){
+  if(selectedShape != null){
+    let sameShape = (selectedShape.choice === baseChoice);
+    let d = dist(selectedShape.x, selectedShape.y, baseX, baseY);
+    let location = (d < difficulty);
+    if(sameShape && location){
+      success = true;
+      console.log("Success!");
+      newRound();
+    }
   }
 }
