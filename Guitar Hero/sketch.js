@@ -11,22 +11,75 @@ const Judgement = Object.freeze({
   WAITING: "WAITING",
 });
 
-let red;
-let green;
-let blue;
+const Screen = Object.freeze({
+  LEVELSELECT: "level select",
+  PLAYING: "playing",
+  SETTINGS: "settings",
+});
+
+var currentScreen = Screen.LEVELSELECT;
+var prevScreen;
+
+const level1 = [
+  { time: 3000, lane: 0 },
+  { time: 3500, lane: 2 },
+  { time: 4000, lane: 1 },
+  { time: 4000, lane: 3 }, // two notes at once is fine
+  { time: 4500, lane: 0 },
+];
+
+const targetCircleWidth = 75;
+const noteWidth = 50;
+const numLanes = 6;
+const laneStartX = 50;
+const circleStartY = 200;
+const circleEndY = 500;
+
+let button1;
+let levelSelectButton;
+
+let redd;
+let greenn;
+let bluee;
 let lightGreen;
 let mix;
+let grey;
+let levelStart;
 
-var statusList = [
-  Judgement.WAITING,
-  Judgement.WAITING,
-  Judgement.WAITING,
-  Judgement.WAITING,
-];
+var statusList = [];
 
 var streak = 0;
 
+let perfectSound, errorSound;
+
 var pressList = [0, 0, 0, 0];
+
+function preload() {
+  perfectSound = loadSound("assets/coin-ding.wav");
+  errorSound = loadSound("assets/error.wav");
+  loadButtons();
+  for (let i = 0; i < numLanes; i++) {
+    statusList[i] = Judgement.WAITING;
+  }
+}
+
+function loadButtons() {
+  loadLSButtons();
+  loadPLButtons();
+}
+
+function loadPLButtons() {
+  button1 = createButton("level 1");
+  levelSelectButton = createButton("LS");
+
+  button1.position(400, 200);
+  levelSelectButton.position(450, 200);
+
+  button1.mousePressed(() => playLevel(1));
+  levelSelectButton.mousePressed(() => {
+    currentScreen = Screen.LEVELSELECT;
+  });
+}
 
 function setup() {
   createCanvas(800, 600);
@@ -36,19 +89,20 @@ function setup() {
 }
 
 function initColors() {
-  red = color(255, 0, 0);
-  green = color(0, 255, 0);
-  blue = color(0, 0, 255);
+  redd = color(255, 0, 0);
+  greenn = color(0, 255, 0);
+  grey = color(112, 99, 98);
+  bluee = color(0, 0, 255);
   lightGreen = color(82, 222, 119);
   mix = color(46, 39, 122);
 }
 
-function draw() {
+function drawPlaying() {
   delta = millis() - currentTime;
   currentTime = millis();
   background(220);
 
-  for (let i = 0; i < pressList.length; i++) {
+  for (let i = 0; i < numLanes; i++) {
     let time = millis();
     let diff = time - pressList[i];
     if (time == diff) {
@@ -58,21 +112,23 @@ function draw() {
     }
   }
 
-  for (let idx = 0; idx < statusList.length; idx++) {
-    let x = (idx + 1) * 50;
+  for (let idx = 0; idx < numLanes; idx++) {
+    let x = (idx + 1) * targetCircleWidth;
     let status = statusList[idx];
     if (status == Judgement.WAITING) {
-      makeLane(x, x + 50, green);
+      makeLane(x, x + targetCircleWidth, grey);
     } else if (status == Judgement.GOOD) {
-      makeLane(x, x + 50, mix);
+      makeLane(x, x + targetCircleWidth, mix);
       streak++;
     } else if (status == Judgement.PERFECT) {
-      makeLane(x, x + 50, lightGreen);
+      makeLane(x, x + targetCircleWidth, lightGreen);
+      perfectSound.play();
       streak++;
     } else if (status == Judgement.WRONG_LANE) {
-      makeLane(x, x + 50, blue);
+      makeLane(x, x + targetCircleWidth, bluee);
     } else {
-      makeLane(x, x + 50, red);
+      makeLane(x, x + targetCircleWidth, redd);
+      errorSound.play();
       streak = 0;
     }
   }
@@ -86,19 +142,79 @@ function draw() {
       circleList[i].display();
     }
   }
+  //checkAndPlaySound();
   print(circleList.length);
-  makeTarget(50, 250);
+  makeTarget(laneStartX + 25, laneStartX + targetCircleWidth * numLanes + 25);
+}
+
+function hidePlayingButtons() {
+  button1.hide();
+  levelSelectButton.hide();
+}
+
+function showPlayingButtons() {
+  button1.show();
+  levelSelectButton.show();
+}
+
+function draw() {
+  if (currentScreen == Screen.LEVELSELECT && prevScreen != Screen.LEVELSELECT) {
+    drawLevelSelect();
+    hidePlayingButtons();
+    showLevelSelectButtons();
+  } else if (currentScreen == Screen.PLAYING) {
+    drawPlaying();
+    if (prevScreen != Screen.PLAYING) {
+      hideLevelSelectButtons();
+      showPlayingButtons();
+    }
+  }
+  prevScreen = currentScreen;
+}
+
+async function checkAndPlaySound() {
+  for (let i = 0; i < numLanes; i++) {
+    if (statusList[i] == Judgement.PERFECT) {
+      perfectSound.play();
+    }
+  }
 }
 
 function drawLabels() {
-  fill(87, 69, 68);
+  let c = color(87, 69, 68);
+  fill(c);
   textAlign(CENTER, TOP);
   text("Streak" + 5);
 }
 
+function clearNotes() {
+  circleList = [];
+}
+
+function playLevel(num) {
+  console.log("level " + num + " start");
+}
+
+function loadLevel1() {
+  levelStart = millis();
+  clearNotes();
+  let spawnTime = [];
+  for (let i = 0; i < level1.length; i++) {
+    spawnTime[i] = level1[i].time - calcTravelTime();
+  }
+}
+
+function calcTravelTime() {
+  let distance = circleEndY - circleStartY;
+  return distance * levelSpeed;
+}
+
 function keyPressed() {
   if (key === "w") {
-    createNote();
+    createNoteRand();
+  }
+
+  if (key === "1") {
   }
 
   if (key === "a") {
@@ -160,13 +276,18 @@ function checkDetection(laneNum) {
 }
 
 function laneX(laneIdx) {
-  return (laneIdx + 1) * 50 + 25;
+  return (laneIdx + 1) * targetCircleWidth + targetCircleWidth / 2;
 }
-function createNote() {
+function createNoteRand() {
   let myColor = color(50, 255, 50);
   let val = randInt(0, 3);
   console.log(val);
-  circleList.push(new Note(laneX(val), 50, myColor, 50));
+  circleList.push(new Note(laneX(val), circleStartY, myColor, noteWidth));
+}
+
+function createNote(laneNum) {
+  let myColor = color(50, 255, 50);
+  circleList.push(new Note(laneX(laneNum), circleStartY, myColor, noteWidth));
 }
 
 //generates an integer inclusive between low and high
@@ -184,12 +305,13 @@ function makeLane(startX, endX, circleColor) {
   line(startX, 0, startX, height);
   line(endX, 0, endX, height);
   fill(circleColor);
-  circle(startX + 25, 500, startX - endX);
+  circle(startX + targetCircleWidth / 2.0, circleEndY, startX - endX);
 }
 
 function makeTarget(startX, endX) {
+  let laneY = 500;
   stroke(0);
   strokeWeight(10);
-  line(startX, 500, endX, 500);
+  line(startX, laneY, endX, laneY);
   strokeWeight(1);
 }
