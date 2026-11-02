@@ -12,9 +12,11 @@ var highScore = 0;
 
 let optionShapes = [];
 let selectedShape = null;
-let gameState = "playing";
+let gameState = "instructions";
 
 let success = false;
+
+let newShape, home, newGame;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -24,20 +26,21 @@ function setup() {
   stroke(0);
   strokeWeight(1);
   
-  let newShape = createButton("New Shape");
+  newShape = createButton("New Shape");
   newShape.position(20,20);
   newShape.mousePressed(newRound);
   newShape.style('background-color','#e6f4e1');
+  newShape.hide();
 
-  let home = createButton("Homescreen");
+  home = createButton("Homescreen");
   home.position(windowWidth - 120, 20);
   home.style('background-color', '#e6f4e1');
   home.mousePressed(function () {
     window.location.href = "../index.html";
+    gameState = "instructions";
   });
 
-  let newGame = createButton("New Game");
-  newGame.hide();
+  newGame = createButton("New Game");
   newGame.position(windowWidth/2 - 40, windowHeight - 80);
   newGame.style('background-color','#e6f4e1');
   newGame.mousePressed(function(){
@@ -45,16 +48,17 @@ function setup() {
     newGame.hide();
     endGame.show();
     newShape.show();
+    points = 0;
     newRound();
   })
   
   let endGame = createButton("End Game");
+  endGame.hide();
   endGame.position(windowWidth/2 - 40, windowHeight - 80);
   endGame.style('background-color','#e6f4e1');
   endGame.mousePressed(function(){
     score = points;
     updateHighScore();
-    points = 0;
     gameState = "endScreen"
     endGame.hide();
     newShape.hide();
@@ -158,8 +162,12 @@ function mouseReleased(){
 
 function draw() {
   background(220);
-
-  if(gameState === "playing"){
+  if(gameState === "instructions"){
+    textAlign(CENTER, CENTER);
+    textSize(28);
+    text(`Instructions:\n \nClick on New Game to start the game.\n \nDrag the matching pink shape to the blue shape\n to earn a point, strive for a higher score each time!\n \nClick End Game to conclude your playing session.\n \nIf you run into any difficulties,\nyou can click New Shape for a different set of shapes!\n `, windowWidth/2, windowHeight/2 - 30);
+  }
+  else if(gameState === "playing"){
     fill('#cee4e9');
     drawSpecificShape(baseX, baseY, baseChoice, size, baseStartAngle, baseStopAngle);
   
@@ -168,15 +176,18 @@ function draw() {
       let shape = optionShapes[i];
       drawSpecificShape(shape.x, shape.y, shape.choice, size, shape.startAngle, shape.stopAngle);
     }
+    
     //Score Board
-  fill('#e6f4e1');
-  stroke(0);
-  rect(windowWidth/2, 35, 200, 50); 
-  fill(0); 
-  textSize(16);
-  textAlign(CENTER,CENTER);
-  text(`Current Score: ${points} points`, windowWidth/2, 35);
-  } else if (gameState === "endScreen"){
+    fill('#e6f4e1');
+    stroke(0);
+    rect(windowWidth/2, 35, 200, 50); 
+    fill(0); 
+    textSize(16);
+    textAlign(CENTER,CENTER);
+    text(`Current Score: ${points} points`, windowWidth/2, 35);
+  }
+  
+  else if (gameState === "endScreen"){
     textAlign(CENTER, CENTER);
     textSize(28);
     text(`High Score: ${highScore} points\n Current Score: ${score} points`, windowWidth/2, windowHeight/2);
@@ -201,4 +212,12 @@ function updateHighScore(){
   if(score > highScore){
     highScore = score;
   }
+}
+
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+  home.position(windowWidth - 120, 20);
+  newGame.position(windowWidth / 2 - 40, windowHeight - 80);
+  endGame.position(windowWidth / 2 - 40, windowHeight - 80);
+  redraw();
 }
