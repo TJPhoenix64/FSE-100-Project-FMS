@@ -6,9 +6,13 @@ var baseStopAngle;
 var size;
 var number;
 var difficulty = 30;
+var points = 0;
+var score = 0;
+var highScore = 0;
 
 let optionShapes = [];
 let selectedShape = null;
+let gameState = "playing";
 
 let success = false;
 
@@ -31,6 +35,32 @@ function setup() {
   home.mousePressed(function () {
     window.location.href = "../index.html";
   });
+
+  let newGame = createButton("New Game");
+  newGame.hide();
+  newGame.position(windowWidth/2 - 40, windowHeight - 80);
+  newGame.style('background-color','#e6f4e1');
+  newGame.mousePressed(function(){
+    gameState = "playing";
+    newGame.hide();
+    endGame.show();
+    newShape.show();
+    newRound();
+  })
+  
+  let endGame = createButton("End Game");
+  endGame.position(windowWidth/2 - 40, windowHeight - 80);
+  endGame.style('background-color','#e6f4e1');
+  endGame.mousePressed(function(){
+    score = points;
+    updateHighScore();
+    points = 0;
+    gameState = "endScreen"
+    endGame.hide();
+    newShape.hide();
+    newGame.show();
+    redraw();
+  })
   
   newRound();
 }
@@ -96,6 +126,7 @@ function drawSpecificShape(x, y, choice, size, startAngle, stopAngle){
 }
 
 function mousePressed(){
+  if (gameState !== "playing") return;
   for (let i = optionShapes.length - 1; i >= 0; i--) {
     let shape = optionShapes[i];
     let d = dist(mouseX, mouseY, shape.x, shape.y);
@@ -109,6 +140,7 @@ function mousePressed(){
 }
 
 function mouseDragged(){
+  if (gameState !== "playing") return;
   if(selectedShape != null){
     selectedShape.x = mouseX;
     selectedShape.y = mouseY;
@@ -126,13 +158,28 @@ function mouseReleased(){
 
 function draw() {
   background(220);
-  fill('#cee4e9');
-  drawSpecificShape(baseX, baseY, baseChoice, size, baseStartAngle, baseStopAngle);
+
+  if(gameState === "playing"){
+    fill('#cee4e9');
+    drawSpecificShape(baseX, baseY, baseChoice, size, baseStartAngle, baseStopAngle);
   
-  fill('#f0dbdb');
-  for(let i = 0; i < 5; i++){
-    let shape = optionShapes[i];
-    drawSpecificShape(shape.x, shape.y, shape.choice, size, shape.startAngle, shape.stopAngle);
+    fill('#f0dbdb');
+    for(let i = 0; i < 5; i++){
+      let shape = optionShapes[i];
+      drawSpecificShape(shape.x, shape.y, shape.choice, size, shape.startAngle, shape.stopAngle);
+    }
+    //Score Board
+  fill('#e6f4e1');
+  stroke(0);
+  rect(windowWidth/2, 35, 200, 50); 
+  fill(0); 
+  textSize(16);
+  textAlign(CENTER,CENTER);
+  text(`Current Score: ${points} points`, windowWidth/2, 35);
+  } else if (gameState === "endScreen"){
+    textAlign(CENTER, CENTER);
+    textSize(28);
+    text(`High Score: ${highScore} points\n Current Score: ${score} points`, windowWidth/2, windowHeight/2);
   }
 }
 
@@ -144,7 +191,14 @@ function successCheck(){
     if(sameShape && location){
       success = true;
       console.log("Success!");
+      points++;
       newRound();
     }
+  }
+}
+
+function updateHighScore(){
+  if(score > highScore){
+    highScore = score;
   }
 }
