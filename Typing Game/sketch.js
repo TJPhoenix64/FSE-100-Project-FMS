@@ -12,14 +12,17 @@ let phrases = [
 let targetPhrase = ""; 
 let showAccurate = false;
 
+  let j=0; 
+let showFeedback = false; 
+
 
 
 function setup() {
-  createCanvas(400, 400);
+  createCanvas(windowWidth, windowHeight);
 
   nextPhrase(); 
   let button = createButton('NEXT'); 
-  button.position(325,215); 
+  button.position((width / 2) +125, (height / 2) +35); 
   button.mousePressed(nextPhrase); 
 }
 
@@ -28,7 +31,7 @@ function draw() {
   background(220);
 
   fill("white"); 
-  rect(25, 150, 350, 50);
+  rect((width / 2) - 175, (height / 2) - 25, 350, 50);
 
   textSize(25); 
   textStyle(BOLD); 
@@ -40,6 +43,10 @@ function draw() {
 
   if(showAccurate === true){
     accurate(); 
+  }
+
+  if(showFeedback === true){
+    feedback(); 
   }
 }
 
@@ -73,7 +80,7 @@ function nextPhrase(){
 
 
 function compare(){
-  let x = 35; 
+  let x = (width / 2) - 170; 
   
   for(let i = 0; i < typedText.length; i++){
 
@@ -83,7 +90,7 @@ function compare(){
       fill("red"); 
     }
 
-    text(typedText[i], x, 183); 
+    text(typedText[i], x, (height / 2) +10); 
 
     if(typedText[i] === " "){
       x = x + 7;
@@ -105,22 +112,30 @@ function submit(){
 
     if(typedText[j] !== targetPhrase[j]){
       c = 3;
+      
     }
   }
 
   if(c === 0){
     showAccurate = true;
+    j=j+1; 
+  }
+
+
+  if(j===3){
+    showFeedback = true; 
+    j=0;
   }
 }
 
 
 function displayTarget(){
-  let x = 35; 
+  let x = (width / 2) - 170; 
 
   for(let k = 0; k < targetPhrase.length; k++){
 
     fill("#B8B8FF"); 
-    text(targetPhrase[k], x, 183); 
+    text(targetPhrase[k], x, (height / 2) +10); 
 
     if(targetPhrase[k] === " "){ 
       x = x + 7; 
@@ -133,9 +148,23 @@ function displayTarget(){
 
 function accurate(){
   fill("#dcf2e8"); 
-  rect(100, 230, 200, 60, 50); 
+  rect( (width / 2) -100,  (height / 2) +80, 200, 60, (height / 2) +10); 
 
   fill("green"); 
   textSize(20); 
-  text("100% Accurate", 130, 265);
+  text("100% Accurate", (width / 2) -70, (height / 2) +115);
 }
+
+function windowReseized(){
+  resizeCanvas(windowWidth, windowHeight); 
+}
+
+function feedback(){
+
+  fill("gold"); 
+  textStyle(BOLD); 
+  textSize(30); 
+
+  text("3 PHRASES ACCOMPLISHED!", (width / 2)-220 , (height / 2)-100 );
+}
+
