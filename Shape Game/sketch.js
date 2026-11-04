@@ -20,15 +20,17 @@ let newShape, home, newGame, endGame;
 
 let mySound, backgroundMusic;
 
-async function setup() {
+function preload() {
+  mySound = loadSound("assets/successful.mp3");
+}
+
+function setup() {
   createCanvas(windowWidth, windowHeight);
   background(220);
   noLoop();
   rectMode(CENTER);
   stroke(0);
   strokeWeight(1);
-
-  mySound = await loadSound('successful.mp3');
   
   newShape = createButton("New Shape");
   newShape.position(20,20);
