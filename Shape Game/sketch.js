@@ -20,10 +20,6 @@ let newShape, home, newGame, endGame;
 
 let mySound, backgroundMusic;
 
-function preload() {
-  mySound = loadSound("assets/successful.mp3");
-}
-
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background(220);
@@ -68,7 +64,7 @@ function setup() {
     endGame.hide();
     newShape.hide();
     newGame.show();
-    mySound.play();
+    //mySound.play();
     redraw();
   })
   endGame.hide();
