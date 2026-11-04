@@ -2,7 +2,6 @@ var startTime;
 var currentTime;
 var delta;
 let circleList = [];
-var levelSpeed = 50;
 const Judgement = Object.freeze({
   PERFECT: "PERFECT",
   GOOD: "GOOD",
@@ -17,20 +16,32 @@ const Screen = Object.freeze({
   SETTINGS: "settings",
 });
 
+const PLAYSTATUS = Object.freeze({
+  NOTPLAYING: "not playing",
+  PRESET: "preset",
+  USERGUIDED: "user guided",
+});
+
 var currentScreen = Screen.LEVELSELECT;
 var prevScreen;
 
-const level1 = [
-  { time: 3000, lane: 0 },
-  { time: 3500, lane: 2 },
-  { time: 4000, lane: 1 },
-  { time: 4000, lane: 3 }, // two notes at once is fine
-  { time: 4500, lane: 0 },
+var playStatus = PLAYSTATUS.NOTPLAYING;
+
+const level1Data = [
+  { time: 6000, lane: 0 },
+  { time: 7000, lane: 2 },
+  { time: 8000, lane: 1 },
+  { time: 8000, lane: 3 }, // two notes at once is fine
+  { time: 7500, lane: 0 },
 ];
+
+const level1 = new Level(4, 50, level1Data);
+
+var currentLevel;
 
 const targetCircleWidth = 75;
 const noteWidth = 50;
-const numLanes = 6;
+const numLanes = 4;
 const laneStartX = 50;
 const circleStartY = 200;
 const circleEndY = 500;
@@ -54,6 +65,8 @@ let perfectSound, errorSound;
 
 var pressList = [0, 0, 0, 0];
 
+var spawnTime = [];
+
 function preload() {
   perfectSound = loadSound("assets/coin-ding.wav");
   errorSound = loadSound("assets/error.wav");
@@ -69,13 +82,16 @@ function loadButtons() {
 }
 
 function loadPLButtons() {
-  button1 = createButton("level 1");
-  levelSelectButton = createButton("LS");
+  button1 = createButton("Start Level");
+  levelSelectButton = createButton("Level Select");
 
   button1.position(400, 200);
-  levelSelectButton.position(450, 200);
+  levelSelectButton.position(520, 200);
 
-  button1.mousePressed(() => playLevel(1));
+  button1.mousePressed(() => {
+    playLevel(1);
+    console.log("playing level 1");
+  });
   levelSelectButton.mousePressed(() => {
     currentScreen = Screen.LEVELSELECT;
   });
@@ -135,7 +151,7 @@ function drawPlaying() {
 
   //print("time:" + delta);
   for (let i = circleList.length - 1; i >= 0; i--) {
-    circleList[i].update(delta, levelSpeed);
+    circleList[i].update(delta, currentLevel.velocity);
     if (circleList[i].getY() > height - 50) {
       circleList.splice(i, 1);
     } else {
@@ -158,18 +174,40 @@ function showPlayingButtons() {
 }
 
 function draw() {
+  //console.log(playStatus);
   if (currentScreen == Screen.LEVELSELECT && prevScreen != Screen.LEVELSELECT) {
+    playStatus = PLAYSTATUS.NOTPLAYING;
     drawLevelSelect();
     hidePlayingButtons();
     showLevelSelectButtons();
   } else if (currentScreen == Screen.PLAYING) {
     drawPlaying();
     if (prevScreen != Screen.PLAYING) {
+      playStatus = PLAYSTATUS.USERGUIDED;
       hideLevelSelectButtons();
       showPlayingButtons();
     }
+    if (playStatus == PLAYSTATUS.PRESET) {
+      //console.log("time since button" + (millis() - levelStart));
+      drawShapes(1, millis() - levelStart);
+    }
   }
   prevScreen = currentScreen;
+}
+
+function drawShapes(levelNum, time) {
+  //console.log("THIS");
+  //console.log("level length:" + currentLevel.length);
+  for (let i = 0; i < currentLevel.noteData.length; i++) {
+    //console.log("time: " + time);
+    if (time >= spawnTime[i]) {
+      console.log("creating note" + time + " spawnTime" + spawnTime[i]);
+      createNote(currentLevel.noteData[i].lane);
+      currentLevel.noteData.splice(i, 1);
+      spawnTime.splice(i, 1);
+      //console.log("time: " + time);
+    }
+  }
 }
 
 async function checkAndPlaySound() {
@@ -192,57 +230,58 @@ function clearNotes() {
 }
 
 function playLevel(num) {
-  console.log("level " + num + " start");
+  playStatus = PLAYSTATUS.PRESET;
+  //console.log("level " + num + " start");
+  if (num == 1) {
+    clearNotes();
+    currentLevel = level1.clone();
+    loadLevel1();
+  }
 }
 
 function loadLevel1() {
   levelStart = millis();
   clearNotes();
-  let spawnTime = [];
-  for (let i = 0; i < level1.length; i++) {
-    spawnTime[i] = level1[i].time - calcTravelTime();
+  console.log("note data: " + currentLevel.noteData);
+  for (let i = 0; i < currentLevel.noteData.length; i++) {
+    spawnTime[i] =
+      currentLevel.noteData[i].time -
+      currentLevel.calcTravelTimeOOP(circleEndY - circleStartY);
+    console.log(
+      "startTime: " +
+        (currentLevel.noteData[i].time -
+          currentLevel.calcTravelTimeOOP(circleEndY - circleStartY))
+    );
   }
 }
 
-function calcTravelTime() {
-  let distance = circleEndY - circleStartY;
-  return distance * levelSpeed;
-}
-
 function keyPressed() {
-  if (key === "w") {
+  if ((key === "w" || key === "W") && playStatus == PLAYSTATUS.USERGUIDED) {
     createNoteRand();
   }
 
   if (key === "1") {
   }
 
-  if (key === "a") {
-    pressList[0] = millis();
+  if (key === "a" || key === "A") {
+    registerKeyPress(0);
+  }
+  if (key === "s" || key === "S") {
+    registerKeyPress(1);
+  }
+  if (key === "d" || key === "D") {
+    registerKeyPress(2);
+  }
+  if (key === "f" || key === "F") {
+    registerKeyPress(3);
+  }
+}
 
-    let result = checkDetection(0);
-    setLaneStatus(0, result);
-    console.log(statusList[0]);
-  }
-  if (key === "s") {
-    pressList[1] = millis();
+function registerKeyPress(num) {
+  pressList[num] = millis();
 
-    let result = checkDetection(1);
-    setLaneStatus(1, result);
-    console.log(statusList[1]);
-  }
-  if (key === "d") {
-    pressList[2] = millis();
-    let result = checkDetection(2);
-    setLaneStatus(2, result);
-    console.log(statusList[2]);
-  }
-  if (key === "f") {
-    pressList[3] = millis();
-    let result = checkDetection(3);
-    setLaneStatus(3, result);
-    console.log(statusList[3]);
-  }
+  let result = checkDetection(num);
+  setLaneStatus(num, result);
 }
 
 function setLaneStatus(laneIdx, result) {
@@ -271,7 +310,7 @@ function checkDetection(laneNum) {
   }
   let circleY = note.getY();
   let diff = 500 - circleY;
-  console.log(diff);
+  //console.log(diff);
   return diff;
 }
 
@@ -281,7 +320,7 @@ function laneX(laneIdx) {
 function createNoteRand() {
   let myColor = color(50, 255, 50);
   let val = randInt(0, 3);
-  console.log(val);
+  //console.log(val);
   circleList.push(new Note(laneX(val), circleStartY, myColor, noteWidth));
 }
 
