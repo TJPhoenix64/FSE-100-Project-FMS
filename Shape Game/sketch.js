@@ -16,7 +16,9 @@ let gameState = "instructions";
 
 let success = false;
 
-let newShape, home, newGame;
+let newShape, home, newGame, endGame;
+
+let mySound, backgroundMusic;
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
@@ -41,7 +43,7 @@ function setup() {
   });
 
   newGame = createButton("New Game");
-  newGame.position(windowWidth/2 - 40, windowHeight - 80);
+  newGame.position(windowWidth/2 - 40, windowHeight - 70);
   newGame.style('background-color','#e6f4e1');
   newGame.mousePressed(function(){
     gameState = "playing";
@@ -52,9 +54,8 @@ function setup() {
     newRound();
   })
   
-  let endGame = createButton("End Game");
-  endGame.hide();
-  endGame.position(windowWidth/2 - 40, windowHeight - 80);
+  endGame = createButton("End Game");
+  endGame.position(windowWidth/2 - 40, windowHeight - 70);
   endGame.style('background-color','#e6f4e1');
   endGame.mousePressed(function(){
     score = points;
@@ -63,8 +64,10 @@ function setup() {
     endGame.hide();
     newShape.hide();
     newGame.show();
+    //mySound.play();
     redraw();
   })
+  endGame.hide();
   
   newRound();
 }
@@ -202,7 +205,7 @@ function successCheck(){
     if(sameShape && location){
       success = true;
       console.log("Success!");
-      points++;
+      points = points + 1;
       newRound();
     }
   }
@@ -217,7 +220,7 @@ function updateHighScore(){
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight);
   home.position(windowWidth - 120, 20);
-  newGame.position(windowWidth / 2 - 40, windowHeight - 80);
-  endGame.position(windowWidth / 2 - 40, windowHeight - 80);
+  newGame.position(windowWidth / 2 - 40, windowHeight - 70);
+  endGame.position(windowWidth / 2 - 40, windowHeight - 70);
   redraw();
 }
