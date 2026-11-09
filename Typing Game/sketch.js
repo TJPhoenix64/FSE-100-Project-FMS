@@ -14,7 +14,7 @@ let showAccurate = false;
 
   let j=0; 
 let showFeedback = false; 
-
+let feedbackSize = 20; 
 
 
 function setup() {
@@ -76,6 +76,7 @@ function nextPhrase(){
   targetPhrase = random(phrases); 
   typedText = ""; 
   showAccurate = false;
+  showFeedback = false; 
 }
 
 
@@ -160,11 +161,20 @@ function windowReseized(){
 }
 
 function feedback(){
-
+push();
   fill("gold"); 
   textStyle(BOLD); 
-  textSize(30); 
+  textSize(feedbackSize); 
+  stroke("black"); 
+  strokeWeight(2)
 
   text("3 PHRASES ACCOMPLISHED!", (width / 2)-220 , (height / 2)-100 );
-}
 
+   
+  pop(); 
+ if(feedbackSize <30){
+    feedbackSize = feedbackSize +0.2; 
+  
+  
+}
+}
