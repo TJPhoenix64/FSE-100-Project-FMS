@@ -15,6 +15,8 @@ let showAccurate = false;
   let j=0; 
 let showFeedback = false; 
 let feedbackSize = 20; 
+let home;
+
 
 
 function setup() {
@@ -24,8 +26,19 @@ function setup() {
   let button = createButton('NEXT'); 
   button.position((width / 2) +125, (height / 2) +35); 
   button.mousePressed(nextPhrase); 
-}
 
+
+  home = createButton("Homescreen");
+  home.position(windowWidth - 650, 20);
+  home.style('background-color', '#e6f4e1');
+  home.mousePressed(function () {
+    window.location.href = "../index.html";
+})
+}
+                    
+function gotolink() {
+	window.open('');
+}
 
 function draw() {
   background(220);
@@ -48,6 +61,8 @@ function draw() {
   if(showFeedback === true){
     feedback(); 
   }
+
+  
 }
 
 
@@ -178,3 +193,4 @@ push();
   
 }
 }
+
