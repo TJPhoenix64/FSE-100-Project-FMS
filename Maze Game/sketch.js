@@ -95,9 +95,16 @@ let mazes = [
 
 let level = 0;
 let gameState = "waiting"; // "waiting", "playing", "lost", "nextLevel", "allDone"
+let homeBtn;
 
 function setup() {
-  createCanvas(700, 700);
+  let cnv =createCanvas(700, 700);
+  homeBtn = createButton("Homescreen");
+  homeBtn.position(cnv.position().x + width - 110, cnv.position().y + 10);
+  homeBtn.style('background-color', '#e6f4e1');
+  homeBtn.mousePressed(function () {
+    window.location.href = "../index.html";
+  });
 }
 
 function draw() {
