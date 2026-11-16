@@ -156,7 +156,7 @@ var statusList = [];
 
 var streak = 0;
 
-let perfectSound, errorSound;
+let perfectSound, errorSound, goodSound;
 
 var pressList = [0, 0, 0, 0];
 
@@ -165,6 +165,7 @@ var spawnTime = [];
 function preload() {
   perfectSound = loadSound("assets/coin-ding.wav");
   errorSound = loadSound("assets/error.wav");
+  goodSound = loadSound("assets/mediumSound.wav");
   loadButtons();
   for (let i = 0; i < numLanes; i++) {
     statusList[i] = Judgement.WAITING;
@@ -197,6 +198,12 @@ function setup() {
   startTime = millis();
   currentTime = startTime;
   initColors();
+  home = createButton("Homescreen");
+  home.position(width - 120, 20);
+
+  home.mousePressed(function () {
+    window.location.href = "../index.html";
+  });
 }
 
 function initColors() {
@@ -230,34 +237,35 @@ function drawPlaying() {
       makeLane(x, x + targetCircleWidth, grey);
     } else if (status == Judgement.GOOD) {
       makeLane(x, x + targetCircleWidth, mix);
-      streak++;
+      goodSound.play();
     } else if (status == Judgement.PERFECT) {
       makeLane(x, x + targetCircleWidth, lightGreen);
       perfectSound.play();
-      streak++;
     } else if (status == Judgement.WRONG_LANE) {
       makeLane(x, x + targetCircleWidth, bluee);
     } else {
       makeLane(x, x + targetCircleWidth, redd);
       errorSound.play();
-      streak = 0;
     }
   }
 
   //print("time:" + delta);
+  clearNotesAtHeight(height - 50);
+  drawKeyGuides();
+  //checkAndPlaySound();
+  print(circleList.length);
+  makeTarget(laneStartX + 25, laneStartX + targetCircleWidth * numLanes + 25);
+}
+
+function clearNotesAtHeight(yVal) {
   for (let i = circleList.length - 1; i >= 0; i--) {
     circleList[i].update(delta, currentLevel.velocity);
-    if (circleList[i].getY() > height - 50) {
+    if (circleList[i].getY() > yVal) {
       circleList.splice(i, 1);
     } else {
       circleList[i].display();
     }
   }
-
-  drawKeyGuides();
-  //checkAndPlaySound();
-  print(circleList.length);
-  makeTarget(laneStartX + 25, laneStartX + targetCircleWidth * numLanes + 25);
 }
 
 function drawKeyGuides() {
@@ -313,22 +321,18 @@ function draw() {
     if (playStatus == PLAYSTATUS.PRESET) {
       //console.log("time since button" + (millis() - levelStart));
       drawShapes(1, millis() - levelStart);
+      drawLabels();
     }
   }
   prevScreen = currentScreen;
 }
 
 function drawShapes(levelNum, time) {
-  //console.log("THIS");
-  //console.log("level length:" + currentLevel.length);
-  for (let i = 0; i < currentLevel.noteData.length; i++) {
-    //console.log("time: " + time);
+  for (let i = currentLevel.noteData.length - 1; i >= 0; i--) {
     if (time >= spawnTime[i]) {
-      console.log("creating note" + time + " spawnTime" + spawnTime[i]);
       createNote(currentLevel.noteData[i].lane);
       currentLevel.noteData.splice(i, 1);
       spawnTime.splice(i, 1);
-      //console.log("time: " + time);
     }
   }
 }
@@ -345,7 +349,7 @@ function drawLabels() {
   let c = color(87, 69, 68);
   fill(c);
   textAlign(CENTER, TOP);
-  text("Streak" + 5);
+  text("Streak" + streak, 400, 400);
 }
 
 function clearNotes() {
@@ -426,10 +430,27 @@ function setLaneStatus(laneIdx, result) {
     statusList[laneIdx] = Judgement.WRONG_LANE;
   } else if (result < -50 || result > 50) {
     statusList[laneIdx] = Judgement.MISS;
+    streak = 0;
   } else if (result > 10 || result < -10) {
     statusList[laneIdx] = Judgement.GOOD;
+    streak++;
+    deleteNoteAtLane(laneIdx);
   } else {
     statusList[laneIdx] = Judgement.PERFECT;
+    streak++;
+    deleteNoteAtLane(laneIdx);
+  }
+}
+
+function deleteNoteAtLane(lane) {
+  console.log("LANE: " + lane);
+
+  for (let i = 0; i < circleList.length; i++) {
+    if (circleList[i].getX() == laneX(lane)) {
+      console.log("Deleting note at Y:", circleList[i].getY());
+      circleList.splice(i, 1);
+      break;
+    }
   }
 }
 

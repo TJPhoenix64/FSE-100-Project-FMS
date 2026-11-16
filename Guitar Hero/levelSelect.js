@@ -12,6 +12,8 @@ function drawLevelSelect() {
   // 2. Draw the text
   // Syntax: text("your message", xPosition, yPosition);
   text("Level Select", width / 2, height / 2);
+
+  text("GUITAR HERO", width / 2, height / 5);
 }
 
 function loadLSButtons() {
@@ -27,20 +29,24 @@ function loadLSButtons() {
 
   level1Button.mousePressed(() => {
     currentScreen = Screen.PLAYING;
+    clearNotes();
     targetLevelNum = 1;
   });
 
   level2Button.mousePressed(() => {
     currentScreen = Screen.PLAYING;
+    clearNotes();
     targetLevelNum = 2;
   });
 
   level3Button.mousePressed(() => {
     currentScreen = Screen.PLAYING;
+    clearNotes();
     targetLevelNum = 3;
   });
   level4Button.mousePressed(() => {
     currentScreen = Screen.PLAYING;
+    clearNotes();
     targetLevelNum = 4;
   });
 }
