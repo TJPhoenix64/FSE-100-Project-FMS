@@ -13,17 +13,17 @@ var highScore = 0;
 let optionShapes = [];
 let selectedShape = null;
 let gameState = "instructions";
+let shapeColors = ['#f0dbdb', '#f5e1c8', '#e2d8f0', '#f4d3c2', '#d4e8dd', '#f2e8cf'];
 
 let success = false;
 
 let newShape, home, newGame, endGame;
 
-let mySound, backgroundMusic;
-
 function setup() {
   createCanvas(windowWidth, windowHeight);
   background(220);
   noLoop();
+  angleMode(DEGREES);
   rectMode(CENTER);
   stroke(0);
   strokeWeight(1);
@@ -64,7 +64,6 @@ function setup() {
     endGame.hide();
     newShape.hide();
     newGame.show();
-    //mySound.play();
     redraw();
   })
   endGame.hide();
@@ -75,6 +74,8 @@ function setup() {
 function newRound(){
   generateBaseShape();
   generateShape();
+  generateDistractors(points);
+  optionShapes = shuffle(optionShapes);
   redraw();
 }
 
@@ -99,11 +100,13 @@ function generateShape(){
     }
     
     optionShapes.push({
-      x: random(500, 700),
-      y: random(100, 400),
+      x: random(windowWidth * 0.4, windowWidth - 150),
+      y: random(120, windowHeight - 150),
       choice: i,
       startAngle: sAngle,
-      stopAngle: eAngle
+      stopAngle: eAngle,
+      color: random(shapeColors),
+      shapeSize: size
     });
   }
 }
@@ -132,12 +135,35 @@ function drawSpecificShape(x, y, choice, size, startAngle, stopAngle){
   }
 }
 
+function generateDistractors(val){
+  let maxDistractors = min(val,15);
+  for(let i = 0; i < maxDistractors; i++){
+    let sAngle = random(0, 360);
+    let eAngle = sAngle + random(90, 180);
+
+    let distractorChoice = floor(random(5));
+    while(distractorChoice == baseChoice){
+      distractorChoice = floor(random(5));
+    }
+
+    optionShapes.push({
+      x: random(windowWidth * 0.4, windowWidth - 150),
+      y: random(120, windowHeight - 150),
+      choice: distractorChoice,
+      startAngle: sAngle,
+      stopAngle: eAngle,
+      shapeSize: random(90,240),
+      color: random(shapeColors)
+    });
+  }
+}
+
 function mousePressed(){
   if (gameState !== "playing") return;
   for (let i = optionShapes.length - 1; i >= 0; i--) {
     let shape = optionShapes[i];
     let d = dist(mouseX, mouseY, shape.x, shape.y);
-    if (d < size / 2) {
+    if (d < shape.shapeSize / 2) {
       selectedShape = shape; 
       optionShapes.splice(i, 1);
       optionShapes.push(selectedShape);
@@ -168,15 +194,15 @@ function draw() {
   if(gameState === "instructions"){
     textAlign(CENTER, CENTER);
     textSize(28);
-    text(`Instructions:\n \nClick on New Game to start the game.\n \nDrag the matching pink shape to the blue shape\n to earn a point, strive for a higher score each time!\n \nClick End Game to conclude your playing session.\n \nIf you run into any difficulties,\nyou can click New Shape for a different set of shapes!\n `, windowWidth/2, windowHeight/2 - 30);
+    text(`Instructions:\n \nClick on New Game to start the game.\n \nDrag the matching pastel-colored shape to the blue shape\n to earn a point, strive for a higher score each time!\n \nClick End Game to conclude your playing session.\n \nIf you run into any difficulties,\nyou can click New Shape for a different set of shapes!\n `, windowWidth/2, windowHeight/2 - 30);
   }
   else if(gameState === "playing"){
-    fill('#cee4e9');
+    fill('#4169E1');
     drawSpecificShape(baseX, baseY, baseChoice, size, baseStartAngle, baseStopAngle);
-  
-    fill('#f0dbdb');
-    for(let i = 0; i < 5; i++){
+    
+    for(let i = 0; i < optionShapes.length; i++){
       let shape = optionShapes[i];
+      fill(shape.color);
       drawSpecificShape(shape.x, shape.y, shape.choice, size, shape.startAngle, shape.stopAngle);
     }
     

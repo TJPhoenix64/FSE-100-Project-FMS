@@ -24,24 +24,119 @@ const PLAYSTATUS = Object.freeze({
 
 var currentScreen = Screen.LEVELSELECT;
 var prevScreen;
+var targetLevelNum;
 
 var playStatus = PLAYSTATUS.NOTPLAYING;
 
 const level1Data = [
-  { time: 6000, lane: 0 },
-  { time: 7000, lane: 2 },
-  { time: 8000, lane: 1 },
-  { time: 8000, lane: 3 }, // two notes at once is fine
+  { time: 2000, lane: 0 },
+  { time: 4000, lane: 0 },
+  { time: 5500, lane: 0 },
   { time: 7500, lane: 0 },
+  { time: 10000, lane: 0 },
+  { time: 12000, lane: 0 },
+  { time: 14000, lane: 0 },
+  { time: 15500, lane: 0 },
+  { time: 17500, lane: 0 },
+  { time: 20000, lane: 0 },
+  { time: 22000, lane: 0 },
+  { time: 24000, lane: 0 },
 ];
 
-const level1 = new Level(4, 50, level1Data);
+const level2Data = [
+  { time: 2000, lane: 0 },
+  { time: 3000, lane: 1 },
+  { time: 4000, lane: 0 },
+  { time: 5000, lane: 1 },
+
+  { time: 6500, lane: 0 },
+  { time: 7000, lane: 0 },
+  { time: 8000, lane: 1 },
+  { time: 8500, lane: 1 },
+
+  { time: 10000, lane: 0 },
+  { time: 11000, lane: 1 },
+  { time: 12000, lane: 0 },
+  { time: 13000, lane: 1 },
+
+  { time: 14500, lane: 0 },
+  { time: 14500, lane: 1 },
+
+  { time: 16000, lane: 0 },
+  { time: 17000, lane: 1 },
+  { time: 18000, lane: 1 },
+  { time: 19000, lane: 0 },
+
+  { time: 20500, lane: 0 },
+  { time: 21000, lane: 1 },
+  { time: 22000, lane: 0 },
+  { time: 23000, lane: 1 },
+
+  { time: 24500, lane: 0 },
+  { time: 24500, lane: 1 },
+];
+
+const level3Data = [
+  { time: 2000, lane: 0 },
+  { time: 3000, lane: 1 },
+  { time: 4000, lane: 2 },
+  { time: 5000, lane: 1 },
+
+  { time: 6500, lane: 0 },
+  { time: 7000, lane: 1 },
+  { time: 7500, lane: 2 },
+
+  { time: 9000, lane: 2 },
+  { time: 10000, lane: 1 },
+  { time: 11000, lane: 0 },
+
+  { time: 12500, lane: 0 },
+  { time: 12500, lane: 2 },
+
+  { time: 14000, lane: 0 },
+  { time: 15000, lane: 1 },
+  { time: 16000, lane: 2 },
+  { time: 17000, lane: 1 },
+
+  { time: 18500, lane: 0 },
+  { time: 19000, lane: 0 },
+  { time: 20000, lane: 2 },
+  { time: 20500, lane: 2 },
+
+  { time: 22000, lane: 0 },
+  { time: 23000, lane: 1 },
+  { time: 24000, lane: 2 },
+
+  { time: 25500, lane: 0 },
+  { time: 25500, lane: 2 },
+
+  { time: 27000, lane: 2 },
+  { time: 28000, lane: 1 },
+  { time: 29000, lane: 0 },
+
+  { time: 30500, lane: 0 },
+  { time: 31000, lane: 1 },
+  { time: 31500, lane: 2 },
+];
+
+const level4Data = [
+  { time: 6000, lane: 0 },
+  { time: 8000, lane: 2 },
+  { time: 10000, lane: 1 },
+  { time: 10000, lane: 3 },
+  { time: 9000, lane: 0 },
+];
+
+const level1 = new Level(1, 50, level1Data);
+const level2 = new Level(2, 50, level2Data);
+const level3 = new Level(3, 50, level3Data);
+const level4 = new Level(4, 50, level4Data);
 
 var currentLevel;
 
 const targetCircleWidth = 75;
 const noteWidth = 50;
-const numLanes = 4;
+let numLanes = 4;
 const laneStartX = 50;
 const circleStartY = 200;
 const circleEndY = 500;
@@ -89,8 +184,8 @@ function loadPLButtons() {
   levelSelectButton.position(520, 200);
 
   button1.mousePressed(() => {
-    playLevel(1);
-    console.log("playing level 1");
+    playLevel(targetLevelNum);
+    console.log("playing level " + targetLevelNum);
   });
   levelSelectButton.mousePressed(() => {
     currentScreen = Screen.LEVELSELECT;
@@ -110,7 +205,7 @@ function initColors() {
   grey = color(112, 99, 98);
   bluee = color(0, 0, 255);
   lightGreen = color(82, 222, 119);
-  mix = color(46, 39, 122);
+  mix = color(252, 186, 3);
 }
 
 function drawPlaying() {
@@ -158,9 +253,37 @@ function drawPlaying() {
       circleList[i].display();
     }
   }
+
+  drawKeyGuides();
   //checkAndPlaySound();
   print(circleList.length);
   makeTarget(laneStartX + 25, laneStartX + targetCircleWidth * numLanes + 25);
+}
+
+function drawKeyGuides() {
+  for (let i = 0; i < numLanes; i++) {
+    let l = "A";
+    if (i == 1) {
+      l = "S";
+    } else if (i == 2) {
+      l = "D";
+    } else if (i == 3) {
+      l = "F";
+    } else if (i == 4) {
+      l = "G";
+    } else if (i == 5) {
+      l = "H";
+    }
+
+    drawKey(i * targetCircleWidth + 85, 300, l);
+  }
+}
+
+function drawKey(x, y, letter) {
+  fill(grey);
+  textAlign(CENTER, CENTER);
+  rect(x, y, 50, 50, 3);
+  text(letter, x + 25, y + 25);
 }
 
 function hidePlayingButtons() {
@@ -232,14 +355,27 @@ function clearNotes() {
 function playLevel(num) {
   playStatus = PLAYSTATUS.PRESET;
   //console.log("level " + num + " start");
-  if (num == 1) {
-    clearNotes();
-    currentLevel = level1.clone();
-    loadLevel1();
-  }
+  startLevel(num);
 }
 
-function loadLevel1() {
+function startLevel(num) {
+  clearNotes();
+  if (num == 1) {
+    currentLevel = level1.clone();
+  }
+  if (num == 2) {
+    currentLevel = level2.clone();
+  }
+  if (num == 3) {
+    currentLevel = level3.clone();
+  }
+  if (num == 4) {
+    currentLevel = level4.clone();
+  }
+  loadCurrentLevel();
+}
+
+function loadCurrentLevel() {
   levelStart = millis();
   clearNotes();
   console.log("note data: " + currentLevel.noteData);
@@ -253,6 +389,7 @@ function loadLevel1() {
           currentLevel.calcTravelTimeOOP(circleEndY - circleStartY))
     );
   }
+  numLanes = currentLevel.numLanes;
 }
 
 function keyPressed() {
@@ -287,7 +424,7 @@ function registerKeyPress(num) {
 function setLaneStatus(laneIdx, result) {
   if (result === undefined) {
     statusList[laneIdx] = Judgement.WRONG_LANE;
-  } else if (result < -30 || result > 30) {
+  } else if (result < -50 || result > 50) {
     statusList[laneIdx] = Judgement.MISS;
   } else if (result > 10 || result < -10) {
     statusList[laneIdx] = Judgement.GOOD;
