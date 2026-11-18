@@ -29,7 +29,7 @@ function setup() {
 
 
   home = createButton("Homescreen");
-  home.position(windowWidth - 650, 20);
+  home.position(windowWidth - 120, 20);
   home.style('background-color', '#e6f4e1');
   home.mousePressed(function () {
     window.location.href = "../index.html";
