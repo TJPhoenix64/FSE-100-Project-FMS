@@ -1,60 +1,43 @@
-let level1Button;
-let level2Button;
-let level3Button;
-let level4Button;
+let levelButtons = [];
+
 function drawLevelSelect() {
   background(220);
 
-  fill(0); // Text color (0 = black)
-  textSize(32); // Font size in pixels
-  textAlign(CENTER); // Align text horizontally (LEFT, CENTER, or RIGHT)
+  fill(0);
+  textSize(32);
+  textAlign(CENTER);
 
-  // 2. Draw the text
-  // Syntax: text("your message", xPosition, yPosition);
   text("Level Select", width / 2, height / 2);
+  text("GUITAR HERO", width / 2, height / 5);
 }
 
 function loadLSButtons() {
-  level1Button = createButton("Level 1");
-  level2Button = createButton("Level 2");
-  level3Button = createButton("Level 3");
-  level4Button = createButton("Level 4");
+  for (let i = 0; i < levelArr.length; i++) {
+    let button = createButton("Level " + (i + 1));
+    if (i < levelArr.length / 2) {
+      button.position(200 + i * 100, 200);
+    } else {
+      button.position(200 + (i - levelArr.length / 2) * 100, 250);
+    }
 
-  level1Button.position(200, 200);
-  level2Button.position(300, 200);
-  level3Button.position(400, 200);
-  level4Button.position(500, 200);
+    button.mousePressed(() => {
+      currentScreen = Screen.PLAYING;
+      clearNotes();
+      targetLevelNum = i + 1;
+    });
 
-  level1Button.mousePressed(() => {
-    currentScreen = Screen.PLAYING;
-    targetLevelNum = 1;
-  });
-
-  level2Button.mousePressed(() => {
-    currentScreen = Screen.PLAYING;
-    targetLevelNum = 2;
-  });
-
-  level3Button.mousePressed(() => {
-    currentScreen = Screen.PLAYING;
-    targetLevelNum = 3;
-  });
-  level4Button.mousePressed(() => {
-    currentScreen = Screen.PLAYING;
-    targetLevelNum = 4;
-  });
+    levelButtons.push(button);
+  }
 }
 
 function hideLevelSelectButtons() {
-  level1Button.hide();
-  level2Button.hide();
-  level3Button.hide();
-  level4Button.hide();
+  for (let button of levelButtons) {
+    button.hide();
+  }
 }
 
 function showLevelSelectButtons() {
-  level1Button.show();
-  level2Button.show();
-  level3Button.show();
-  level4Button.show();
+  for (let button of levelButtons) {
+    button.show();
+  }
 }
