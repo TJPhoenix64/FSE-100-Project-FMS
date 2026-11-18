@@ -16,7 +16,10 @@ let showAccurate = false;
 let showFeedback = false; 
 let feedbackSize = 20; 
 let home;
-
+let score= 100; 
+let showDeduct= false; 
+let deductTimer= 0;
+let letterSpacing =18; 
 
 
 function setup() {
@@ -29,7 +32,7 @@ function setup() {
 
 
   home = createButton("Homescreen");
-  home.position(windowWidth - 120, 20);
+  home.position(windowWidth - 720, 20);
   home.style('background-color', '#e6f4e1');
   home.mousePressed(function () {
     window.location.href = "../index.html";
@@ -44,7 +47,7 @@ function draw() {
   background(220);
 
   fill("white"); 
-  rect((width / 2) - 175, (height / 2) - 25, 350, 50);
+  rect((width / 2)-250 , (height / 2) - 25, 500, 50);
 
   textSize(25); 
   textStyle(BOLD); 
@@ -61,6 +64,27 @@ function draw() {
   if(showFeedback === true){
     feedback(); 
   }
+
+
+  if(showDeduct===true){
+      fill("red");
+  textSize(20);
+  text("-2%", (width / 2) + 280, (height / 2)+10);
+
+    deductTimer= deductTimer -1; 
+
+    if(deductTimer<=0){
+      showDeduct=false; 
+    }
+  }
+
+ fill("white"); 
+  rect(5,  60,300, 90,(height /2) ); 
+
+  fill("black"); 
+  textSize(15); 
+  text("Type the phrase with keyboard", 20, 100);
+   text("Press enter when finished one phrase", 20, 120);
 
   
 }
@@ -81,7 +105,13 @@ function keyPressed(){
 
   }else if(key.length === 1){
 
-    typedText += key;
+    if(typedText.length< targetPhrase.length){
+
+       if(key !== targetPhrase[typedText.length]){
+      deduct();
+    }
+
+    typedText += key;}
   }
   
 }
@@ -91,12 +121,14 @@ function nextPhrase(){
   targetPhrase = random(phrases); 
   typedText = ""; 
   showAccurate = false;
-  showFeedback = false; 
+  showFeedback = false;
+  score =100; 
 }
 
 
 function compare(){
-  let x = (width / 2) - 170; 
+  textSize(30);
+  let  x = (width / 2)-220 ;
   
   for(let i = 0; i < typedText.length; i++){
 
@@ -104,16 +136,24 @@ function compare(){
       fill("black");
     }else{
       fill("red"); 
+    
     }
 
     text(typedText[i], x, (height / 2) +10); 
 
-    if(typedText[i] === " "){
-      x = x + 7;
+    if(targetPhrase[i] === " "){
+      
+      x = x + 10;
     }else{
-      x = x + textWidth(targetPhrase[i]);
+      x = x + textWidth(targetPhrase[i])+2;
     }
   }
+}
+
+function deduct(){
+  score= score-2; 
+  showDeduct = true; 
+  deductTimer = 50; 
 }
 
 
@@ -146,17 +186,18 @@ function submit(){
 
 
 function displayTarget(){
-  let x = (width / 2) - 170; 
+  let x = (width / 2) - 220; 
 
   for(let k = 0; k < targetPhrase.length; k++){
 
     fill("#B8B8FF"); 
+    textSize(30);
     text(targetPhrase[k], x, (height / 2) +10); 
 
     if(targetPhrase[k] === " "){ 
-      x = x + 7; 
+      x = x + 10; 
     }else{ 
-      x = x + textWidth(targetPhrase[k]); 
+      x = x + textWidth(targetPhrase[k])+2; 
     }
   }
 }
@@ -168,7 +209,7 @@ function accurate(){
 
   fill("green"); 
   textSize(20); 
-  text("100% Accurate", (width / 2) -70, (height / 2) +115);
+  text(score+ "% Accurate", (width / 2) -70, (height / 2) +115);
 }
 
 function windowReseized(){
@@ -193,4 +234,5 @@ push();
   
 }
 }
+
 
